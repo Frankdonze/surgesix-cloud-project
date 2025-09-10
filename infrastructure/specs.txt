@@ -1,0 +1,13 @@
+Project Description:
+Website for friends to have a friendly competition. User logs into website with email and password combo. User can view the NFL games on the upcoming sunday. They then click a picks button, and can pick a winner for 6 games. Once they pick a winner they can see other peoples picks in a feed. They can comment under other peoples picks and talk crap. The website will dynamically update status of the game and let you know if you won the game or not. At the end of all the games the user with the most won games wins the sunday and the rest are losers.
+
+Stack/plan:
+frontend:Not sure yet.
+infra: AWS
+	- not sure what exactly in AWS I will use yet.
+database: on prem database
+	- patch management ansible
+webserver: 2 for redundancy ec2 server
+	- patch management AWS SSM
+	- route53 for DNS
+	- cloudfront for content delivery
