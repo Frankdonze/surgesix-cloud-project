@@ -18,3 +18,9 @@ override.tf.json
 # CLI configuration files
 .terraformrc
 terraform.rc
+
+# python .env file for db creds
+.env
+
+#alembic.ini file has creds to db in it.
+alembic.ini

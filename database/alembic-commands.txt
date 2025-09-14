@@ -1,0 +1,11 @@
+Commands to remember:
+
+alembic:
+
+1. stages change / creates script to run / stores version history in /migrations/versions:
+	
+	alembic revision --autogenerate -m "message"
+
+2. pushes changes to db:
+
+	alembic upgrade head

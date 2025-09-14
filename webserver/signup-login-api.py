@@ -37,7 +37,7 @@ def signup():
 def login():
     data = request.get_json()
     username = data.get("username")
-    password = generate_password_hash(data.get("password"))
+    password = data.get("password")
 
     if not username or not password:
         return jsonify({"error": "Email, username, and password required"}), 400
@@ -49,9 +49,14 @@ def login():
     user = cursor.fetchone()
 
     if user:
-        db_password = cursor.execute("select Password from Users where Username = (%s)", (username,))
-        if db_password == password:
+        cursor.execute("select Password from Users where Username = (%s)", (username,))
+        row = cursor.fetchone()
+        db_password = row[0]
+
+
+        if check_password_hash(db_password, password):
             return jsonify({"Success": "{username} is now logged in"}), 201
+
         else:
             return jsonify({"error": "Username and password dont match"}), 400
 
