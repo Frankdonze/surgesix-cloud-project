@@ -1,0 +1,9 @@
+strEvent - "Buffalo Bills vs Chicago Bears"
+strEventAlternate - "Chicago Bears @ Buffalo Bills"
+strSeason - "2024"
+strHomeTeam - "Buffalo Bills"
+strAwayTeam - "Chicago Bears"
+intHomeScore - "6"
+intAwayScore - "33"
+dateEvent - "2024-08-10"
+
