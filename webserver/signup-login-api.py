@@ -20,7 +20,7 @@ def signup():
 
     try:
         cursor.execute(
-            "INSERT INTO Users (Username, Email, Password) VALUES (%s, %s, %s)",
+            "INSERT INTO users (Username, Email, Password) VALUES (%s, %s, %s)",
             (username, email, generate_password_hash(password))
         )
         conn.commit()
@@ -45,11 +45,11 @@ def login():
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("select * from Users where Username = %s", (username,))
+    cursor.execute("select * from users where Username = %s", (username,))
     user = cursor.fetchone()
 
     if user:
-        cursor.execute("select Password from Users where Username = (%s)", (username,))
+        cursor.execute("select Password from users where Username = (%s)", (username,))
         row = cursor.fetchone()
         db_password = row[0]
 
@@ -63,6 +63,14 @@ def login():
     else:
         return jsonify({"error": "Username and password dont match"}), 400
 
+# List Games
+@app.route("/games", methods=["GET"])
+def games():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("select id, game from games where date = \"2025-08-09\";")
+    gamelist = cursor.fetchall()
+    return gamelist
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
