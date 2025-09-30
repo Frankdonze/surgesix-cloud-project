@@ -26,11 +26,13 @@ def login():
 def make_picks():
     response = requests.get(f"{BASE_URL}/games")
     gamelist = response.json()
+    
     print("GAME ID  |  GAME TITLE\n")
+    
     for game in gamelist:
         print(game[0], " |  ", game[1])
 
-    for pick in 6:
+    for pick in range(6):
         gameid = input("Game ID for the Game you would like to select: ")
         teampicked = input("Pick the team that you think will win this game: ")
         #store picks in database table need to create new table picks for this will need to releate tp table users

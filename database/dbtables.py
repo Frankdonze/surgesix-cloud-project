@@ -22,3 +22,13 @@ class Games(Base):
     finalscore1 = Column(Integer)
     finalscore2 = Column(Integer)
     date = Column(Date) 
+
+class Pick(Base):
+    __tablename__ = "picks"
+
+    id = Column(Integer, primary_key=True)
+    userID = Column(Integer)
+    gameID = Column(Integer)
+    userpick = Column(String(60))
+    outcome = Column(Boolean, nullable=True)
+

@@ -1,8 +1,30 @@
 from flask import Flask, request, jsonify
+import datetime
+import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 from db import get_connection
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
+
+SECRET_KEY = os.getenv("SECRET")
+
+def create_token(user_id):
+    payload = {
+        "user_id": user_id,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
+    }
+    return jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+def verify_token(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return payload["user_id"]
+    except:
+        return None
 
 # User signup
 @app.route("/signup", methods=["POST"])
@@ -55,7 +77,8 @@ def login():
 
 
         if check_password_hash(db_password, password):
-            return jsonify({"Success": "{username} is now logged in"}), 201
+            token = create_token(user[0])
+            return jsonify({"Token": token}), 201
 
         else:
             return jsonify({"error": "Username and password dont match"}), 400
@@ -71,6 +94,30 @@ def games():
     cursor.execute("select id, game from games where date = \"2025-08-09\";")
     gamelist = cursor.fetchall()
     return gamelist
+
+#pick winners of games
+@app.route("/picks", methods=["POST"])
+def picks():
+
+    token = request.headers.get("Authorization")
+    user_id = verify_token(token)
+
+    if not user_id:
+        return jsonify({"error": "You have been logged out please log back in to make picks"})
+
+    data = request.json
+    game_id = data.get("game_id")
+    pick = data.get("pick")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO picks (userID, gameID, userpick) VALUES (%s, %s, %s)",
+        (userID, gameID, pick)
+    )
+    
+    conn.commit()
+    conn.close()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
