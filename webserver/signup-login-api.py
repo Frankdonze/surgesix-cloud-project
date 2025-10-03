@@ -89,6 +89,15 @@ def login():
 # List Games
 @app.route("/games", methods=["GET"])
 def games():
+    token = request.headers.get("Authorization")
+    user_id = verify_token(token)
+    
+    print(token)
+    print(user_id)
+
+    if not user_id:
+        return jsonify({"error": "You have been logged out please log back in to make picks"}), 400
+
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("select id, game from games where date = \"2025-08-09\";")
@@ -106,18 +115,42 @@ def picks():
         return jsonify({"error": "You have been logged out please log back in to make picks"})
 
     data = request.json
-    game_id = data.get("game_id")
-    pick = data.get("pick")
+    print(data)
+    game_id = data.get("gameID")
+    pick = data.get("userpick")
 
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO picks (userID, gameID, userpick) VALUES (%s, %s, %s)",
-        (userID, gameID, pick)
-    )
     
-    conn.commit()
-    conn.close()
+    try:
+        cursor.execute(
+            "INSERT INTO picks (userID, gameID, userpick) VALUES (%s, %s, %s)",
+            (user_id, game_id, pick)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 400
+    finally:
+        conn.close()
+
+    return jsonify({"Success": "Pick was saved. You feeling lucky?"})
+
+#display user picks
+@app.route("/userpicks", methods=["GET"])
+def userpicks():
+
+    token = request.headers.get("Authorization")
+    user_id = verify_token(token)
+
+    if not user_id:
+        return jsonify({"error": "You have been logged out please log back in to make picks"})
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("select game, userpick, outcome from picks join games on picks.gameID = games.id where userid = (%s)", (user_id,))
+    userpicks = cursor.fetchall()
+    return userpicks
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

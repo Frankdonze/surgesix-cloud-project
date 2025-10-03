@@ -1,6 +1,7 @@
 import requests
 
 BASE_URL = "http://127.0.0.1:5000"
+token = None
 
 def signup():
     username = input("Enter your username: ")
@@ -21,30 +22,60 @@ def login():
         f"{BASE_URL}/login",
         json={"username": username, "password": password}
     )
+    global token
+    token = response.json()["Token"]
     print("Login response:", response.json())
 
 def make_picks():
-    response = requests.get(f"{BASE_URL}/games")
+    headers = { "Authorization": f"{token}" }
+    response = requests.get(f"{BASE_URL}/games", headers=headers)
     gamelist = response.json()
-    
-    print("GAME ID  |  GAME TITLE\n")
-    
-    for game in gamelist:
-        print(game[0], " |  ", game[1])
 
-    for pick in range(6):
-        gameid = input("Game ID for the Game you would like to select: ")
-        teampicked = input("Pick the team that you think will win this game: ")
-        #store picks in database table need to create new table picks for this will need to releate tp table users
+    print("Request Headers:", response.request.headers)  # what you sent
+    print("Response Headers:", response.headers) 
+    
+    if response.status_code != 200:
+        print(gamelist)
+    
+    else:
+        print("GAME ID  |  GAME TITLE\n")
+    
+        for game in gamelist:
+            print(game[0], " |  ", game[1])
+
+        for pick in range(6):
+            gameid = input("Game ID for the Game you would like to select: ")
+            teampicked = input("Pick the team that you think will win this game: ")
+
+            print(repr(gameid))
+            print(repr(teampicked))
+
+            response = requests.post(
+                f"{BASE_URL}/picks",
+                json={"gameID": gameid, "userpick": teampicked},
+                headers=headers
+            )      
+
+            print("pick Response:", response.json())
 
     
 
     #print("Games: ", response.json())
 def view_picks():
-    user_id = input("Enter your user_id: ")
+    headers= { "Authorization": f"{token}" }
+    response = requests.get(f"{BASE_URL}/userpicks", headers=headers)
+    userpicks = response.json()
 
-    response = requests.get(f"{BASE_URL}/picks", params={"user_id": user_id})
-    print("Your picks:", response.json())
+    if response.status_code != 200:
+        print(userpicks)
+
+    else:
+        print(f"{'GAME TITLE':<35}  | {'YOUR PICK':<20}   | {'OUTCOME':<10}\n")
+
+        for pick in userpicks:
+            print(f"{pick[0]:<35}  |  {pick[1]:<20}  |  {str(pick[2]):<10}")
+        
+        #print("Success:", response.json())
 
 # Simple terminal menu
 while True:
